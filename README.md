@@ -1,1 +1,0 @@
-#namecheap_api
