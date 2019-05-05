@@ -362,9 +362,43 @@ class SSL(Common):
             pass
 
 
+    def create_key_and_csr(**name):
+        """
+            Create a certificate request.
+            Arguments: pkey   - The key to associate with the request
+                       digest - Digestion method to use for signing, default is md5
+                       **name - The name of the subject of the request, possible
+                                arguments are:
+                                  C     - Country name
+                                  ST    - State or province name
+                                  L     - Locality name
+                                  O     - Organization name
+                                  OU    - Organizational unit name
+                                  CN    - Common name
+                                  emailAddress - E-mail address
+        """
+        digest = "md5"
+        _key = crypto.PKey()
+        mykey = _key.generate_key(crypto.TYPE_RSA, 2048)
+    
+        req = crypto.X509Req()
+        subj = req.get_subject()
+        for (key, value) in name.items():
+            setattr(subj, key, value)
+        req.set_pubkey(_key)
+        req.sign(_key, digest)
+    
+        private_key = crypto.dump_privatekey(crypto.FILETYPE_PEM, _key).decode("utf-8")
+        public_key = crypto.dump_publickey(crypto.FILETYPE_PEM, _key).decode("utf-8")
+        csr = crypto.dump_certificate_request(crypto.FILETYPE_PEM, req).decode("utf-8")
+    
+        return private_key, public_key, csr
+
+
 
 # 用例
 if __name__=="__main__":
+    pass
     # 获取余额
     # user = User(api_user="api_test", api_key="api_key_test", client_ip="8.8.8.8", test=True)
     # print(user.get_balances())
@@ -391,8 +425,8 @@ if __name__=="__main__":
     # print(ssl.active(certificateid=cid, csr=csr, dnsvalidation=True))
 
     # 获取crt，合成cer
-    ssl = SSL(api_user="api_test", api_key="api_key_test", client_ip="8.8.8.8", test=True)
-    cid = "1234567"  #从getList拿到所有已激活的cid，选择所要的cid和domain
-    print(ssl.getinfo(certificateid=cid, domain="testaaa.com"))
+    # ssl = SSL(api_user="api_test", api_key="api_key_test", client_ip="8.8.8.8", test=True)
+    # cid = "1234567"  #从getList拿到所有已激活的cid，选择所要的cid和domain
+    # print(ssl.getinfo(certificateid=cid, domain="testaaa.com"))
 
 
